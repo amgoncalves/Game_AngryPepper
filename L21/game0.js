@@ -84,11 +84,12 @@ function createMainScene(){
 
     // create the enemy
     enemy = createEnemy();
-    enemy.rotation.set(0, Math.PI / 4, 0);    
     enemy.position.set(0, 4, 60);
-    enemy.__dirtyPosition = true;    
+    enemy.rotation.set(0, Math.PI / 4, 0);
+    enemy.__dirtyPosition = true;
     enemy.__dirtyRotation = true;
     scene.add(enemy);
+    loadSkull();
 
     addBalls();
 
@@ -169,7 +170,7 @@ function soundEffect(file){
 
 /* 
    We don't do much here, but we could do more!
- */
+*/
 function initScene(){
     //scene = new THREE.Scene();
     var scene = new Physijs.Scene();
@@ -268,13 +269,35 @@ function createAvatar(){
 }
 
 function createEnemy(){
-    var geometry = new THREE.BoxGeometry(4, 4, 4);
+    var geometry = new THREE.BoxGeometry(5, 0.1, 5);
     var material = new THREE.MeshLambertMaterial({ color: 0x800000});
+    material.transparent = true;
     var pmaterial = new Physijs.createMaterial(material, 0.9, 0.5);
     var mesh = new Physijs.BoxMesh(geometry, pmaterial);
     mesh.receiveShadow = true;
     mesh.castShadow = true;
     return mesh;
+}
+
+function loadSkull() {
+    var loader = new THREE.OBJLoader();
+    loader.load("../models/skull/skull.obj",
+		function(obj) {
+		    console.log("loading obj file");
+		    obj.scale.x=1;
+		    obj.scale.y=1;
+		    obj.scale.z=1;
+		    obj.position.y = 1;
+		    obj.position.z = 0;
+		    obj.castShadow = true;
+		    enemy.add(obj);
+		},
+		function(xhr){
+		    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );},
+
+		function(err){
+		    console.log("error in loading: "+err);}
+	       )    
 }
 
 function createConeMesh(r,h){
@@ -399,7 +422,7 @@ function updateEnemy() {
     var avatarPosition = new THREE.Vector3().setFromMatrixPosition(avatar.matrixWorld);
     var enemyPosition = new THREE.Vector3().setFromMatrixPosition(enemy.matrixWorld);
     var diff = avatarPosition.distanceTo(enemyPosition);
-    console.log(diff);
+    //console.log(diff);
     if (diff > 0 && diff <= dangerZone) {
 	enemy.lookAt(avatarPosition);
 	var forward = avatar.getWorldDirection();
