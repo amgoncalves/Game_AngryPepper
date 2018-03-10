@@ -9,7 +9,9 @@
 // in the animation code
 var scene, renderer;  // all threejs programs need these
 var camera, avatarCam;  // we have two cameras in the main scene
-var avatar;
+var avatar, enemy;
+var dangerZone = 30; // vector distance between avatar and enemy to trigger enemy reaction
+var creep = 2;
 var clock;
 
 // here are some mesh objects ...
@@ -39,7 +41,6 @@ function createEndScene(){
     endCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
     endCamera.position.set(0,50,1);
     endCamera.lookAt(0,0,0);
-
 }
 
 /**
@@ -81,14 +82,21 @@ function createMainScene(){
     scene.add(avatar);
     gameState.camera = avatarCam;
 
+    // create the enemy
+    enemy = createEnemy();
+    enemy.rotation.set(0, Math.PI / 4, 0);    
+    enemy.position.set(0, 4, 60);
+    enemy.__dirtyPosition = true;    
+    enemy.__dirtyRotation = true;
+    scene.add(enemy);
+
     addBalls();
 
     cone = createConeMesh(4,6);
     cone.position.set(10,3,7);
-    scene.add(cone);
+    //scene.add(cone);
 
     //playGameMusic();
-
 }
 
 function randN(n){
@@ -245,11 +253,9 @@ function createSkyBox(image,k){
 }
 
 function createAvatar(){
-    //var geometry = new THREE.SphereGeometry( 4, 20, 20);
     var geometry = new THREE.BoxGeometry( 5, 5, 6);
     var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
     var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
-    //var mesh = new THREE.Mesh( geometry, material );
     var mesh = new Physijs.BoxMesh( geometry, pmaterial );
     mesh.setDamping(0.1,0.1);
     mesh.castShadow = true;
@@ -258,6 +264,16 @@ function createAvatar(){
     avatarCam.lookAt(0,4,10);
     mesh.add(avatarCam);
 
+    return mesh;
+}
+
+function createEnemy(){
+    var geometry = new THREE.BoxGeometry(4, 4, 4);
+    var material = new THREE.MeshLambertMaterial({ color: 0x800000});
+    var pmaterial = new Physijs.createMaterial(material, 0.9, 0.5);
+    var mesh = new Physijs.BoxMesh(geometry, pmaterial);
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
     return mesh;
 }
 
@@ -377,7 +393,18 @@ function updateAvatar(){
 	avatar.__dirtyPosition = true;
 	avatar.position.set(40,10,40);
     }
+}
 
+function updateEnemy() {
+    var avatarPosition = new THREE.Vector3().setFromMatrixPosition(avatar.matrixWorld);
+    var enemyPosition = new THREE.Vector3().setFromMatrixPosition(enemy.matrixWorld);
+    var diff = avatarPosition.distanceTo(enemyPosition);
+    console.log(diff);
+    if (diff > 0 && diff <= dangerZone) {
+	enemy.lookAt(avatarPosition);
+	var forward = avatar.getWorldDirection();
+	enemy.setLinearVelocity(forward.multiplyScalar(-creep));
+    }
 }
 
 function animate() {
@@ -393,6 +420,7 @@ function animate() {
 
     case "main":
 	updateAvatar();
+	updateEnemy();
 	scene.simulate();
 	if (gameState.camera!= 'none'){
 	    renderer.render( scene, gameState.camera );
