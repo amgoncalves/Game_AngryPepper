@@ -9,7 +9,7 @@
 // in the animation code
 var scene, renderer;  // all threejs programs need these
 var camera, avatarCam;  // we have two cameras in the main scene
-var avatar, enemy;
+var avatar, enemy, bonus;
 var dangerZone = 30; // vector distance between avatar and enemy to trigger enemy reaction
 var creep = 2;
 var clock;
@@ -24,7 +24,7 @@ var controls =
      camera:camera}
 
 var gameState =
-    {score:0, health:10, scene:'main', camera:'none' }
+    {startTime:0, bonusTime:0, score:0, health:10, scene:'main', camera:'none' }
 
 // Here is the main game control
 init();
@@ -80,6 +80,7 @@ function createMainScene(){
     avatarCam.translateY(-4);
     avatarCam.translateZ(3);
     scene.add(avatar);
+    setAvatar();
     gameState.camera = avatarCam;
 
     // create the enemy
@@ -91,11 +92,21 @@ function createMainScene(){
     scene.add(enemy);
     loadSkull();
 
-    addBalls();
+    // create the time plus clock
+    bonus = createClock();
+    bonus.position.set(randN(20)+15,0,randN(20)+15);
+    //enemy.rotation.set(0, Math.PI / 4, 0);
+    bonus.__dirtyPosition = true;
+    //enemy.__dirtyRotation = true;
+    scene.add(bonus);
+    loadClock();
+
+    addBalls(20);
+
 
     cone = createConeMesh(4,6);
     cone.position.set(10,3,7);
-    //scene.add(cone);
+    scene.add(cone);
 
     //playGameMusic();
 }
@@ -104,9 +115,7 @@ function randN(n){
     return Math.random()*n;
 }
 
-function addBalls(){
-    var numBalls = 2
-
+function addBalls(numBalls){
 
     for(i=0;i<numBalls;i++){
 	var ball = createBall();
@@ -131,6 +140,7 @@ function addBalls(){
 			     )
     }
 }
+
 
 function playGameMusic(){
     // create an AudioListener and add it to the camera
@@ -168,7 +178,7 @@ function soundEffect(file){
     });
 }
 
-/* 
+/*
    We don't do much here, but we could do more!
 */
 function initScene(){
@@ -231,7 +241,7 @@ function createGround(image){
     mesh.receiveShadow = true;
 
     mesh.rotateX(Math.PI/2);
-    return mesh
+    return mesh;
     // we need to rotate the mesh 90 degrees to make it horizontal not vertical
 }
 
@@ -249,7 +259,7 @@ function createSkyBox(image,k){
 
     mesh.receiveShadow = false;
 
-    return mesh
+    return mesh;
     // we need to rotate the mesh 90 degrees to make it horizontal not vertical
 }
 
@@ -266,6 +276,27 @@ function createAvatar(){
     mesh.add(avatarCam);
 
     return mesh;
+}
+
+function setAvatar() {
+  avatar.addEventListener( 'collision',
+			       function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+				   if (other_object==enemy){
+				       console.log("avatar hit enemy");
+				       soundEffect('die.wav');
+				       gameState.score -= 1;  // deduct one from the score
+               addBalls(1);
+               avatar.__dirtyPosition = true;
+             	 avatar.position.set(randN(20)+15,20,randN(20)+15);
+				   } else if (other_object==bonus){
+             console.log("avatar hit clock");
+             soundEffect('coin.wav');
+             gameState.bonusTime += 3;
+             bonus.position.y -= 100;
+             bonus.__dirtyPosition = true;
+           }
+			   }
+			)
 }
 
 function createEnemy(){
@@ -297,8 +328,40 @@ function loadSkull() {
 
 		function(err){
 		    console.log("error in loading: "+err);}
-	       )    
+	       )
 }
+
+function createClock(){
+    var geometry = new THREE.BoxGeometry(5, 0.1, 5);
+    var material = new THREE.MeshLambertMaterial({ color: 0x800000});
+    material.transparent = true;
+    var pmaterial = new Physijs.createMaterial(material, 0.9, 0.5);
+    var mesh = new Physijs.BoxMesh(geometry, pmaterial, 0);
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    return mesh;
+}
+
+function loadClock() {
+    var loader = new THREE.OBJLoader();
+    loader.load("../models/clock/clock.obj",
+		function(obj) {
+		    console.log("loading obj file");
+		    obj.scale.x=0.003;
+		    obj.scale.y=0.003;
+		    obj.scale.z=0.003;
+
+		    obj.castShadow = true;
+		    bonus.add(obj);
+		},
+		function(xhr){
+		    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );},
+
+		function(err){
+		    console.log("error in loading: "+err);}
+	       )
+}
+
 
 function createConeMesh(r,h){
     var geometry = new THREE.ConeGeometry( r, h, 32);
@@ -330,6 +393,7 @@ function initControls(){
     //create a clock for the time-based animation ...
     clock = new THREE.Clock();
     clock.start();
+    gameState.startTime = clock.getElapsedTime()
 
     window.addEventListener( 'keydown', keydown);
     window.addEventListener( 'keyup',   keyup );
@@ -342,7 +406,9 @@ function keydown(event){
     if (gameState.scene == 'youwon' && event.key=='r') {
 	gameState.scene = 'main';
 	gameState.score = 0;
-	addBalls();
+  gameState.startTime = clock.getElapsedTime();
+  gameState.timeLeft = 60;
+	addBalls(20);
 	return;
     }
 
@@ -445,6 +511,7 @@ function animate() {
 	updateAvatar();
 	updateEnemy();
 	scene.simulate();
+  gameState.timeLeft = Math.round(60 - (clock.getElapsedTime() - gameState.startTime) + gameState.bonusTime)
 	if (gameState.camera!= 'none'){
 	    renderer.render( scene, gameState.camera );
 	}
@@ -457,6 +524,6 @@ function animate() {
 
     //draw heads up display ..
     var info = document.getElementById("info");
-    info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
+    info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '  Time left: ' + gameState.timeLeft +'</div>';
 
 }
