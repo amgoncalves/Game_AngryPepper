@@ -18,6 +18,8 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	var endScene, endCamera, endText;
 
+	var startScene, startCamera, startText;
+
 
 
 
@@ -27,16 +29,35 @@ The user moves a cube around the board trying to knock balls into a cone
 				speed:10, fly:false, reset:false,
 		    camera:camera}
 
-	var gameState =
-	     {score:0, health:10, scene:'main', camera:'none' }
+	// var gameState =
+	//      {score:0, health:10, scene:'main', camera:'none' }
+
+	     var gameState =
+	     {scene:'start', camera: 'none' }
 
 
 	// Here is the main game control
-  init(); //
+	createOpenScene()
+  	init();
 	initControls();
 	animate();  // start the animation loop!
 
+	function createOpenScene(){
+			
+		startScene = new THREE.Scene();
+		startText = createBackground('welcome.png',1);
 
+  		
+
+
+		startScene.add(startText);
+		var startlight = createPointLight();
+		startlight.position.set(0,200,20);
+		startScene.add(startlight);
+		startCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		startCamera.position.set(0,50,1);
+		startCamera.lookAt(0,0,0);
+	}
 
 
 	function createEndScene(){
@@ -59,6 +80,8 @@ The user moves a cube around the board trying to knock balls into a cone
 	function init(){
       initPhysijs();
 			scene = initScene();
+
+
 			createEndScene();
 			initRenderer();
 			createMainScene();
@@ -188,8 +211,8 @@ The user moves a cube around the board trying to knock balls into a cone
 	}
 
   function initPhysijs(){
-    Physijs.scripts.worker = '/js/physijs_worker.js';
-    Physijs.scripts.ammo = '/js/ammo.js';
+    Physijs.scripts.worker = '../js/physijs_worker.js';
+    Physijs.scripts.ammo = '../js/ammo.js';
   }
 	/*
 		The renderer needs a size and the actual canvas we draw on
@@ -248,6 +271,45 @@ The user moves a cube around the board trying to knock balls into a cone
 		return mesh
 		// we need to rotate the mesh 90 degrees to make it horizontal not vertical
 	}
+
+	function createBackground(image,k){
+		
+		var planeGeometry = new THREE.PlaneGeometry( 200, 200, 128 );
+		var texture = new THREE.TextureLoader().load( '../images/'+image );
+		var planeMaterial = new THREE.MeshLambertMaterial( { color: 0xaaaaaa,  map: texture ,side:THREE.DoubleSide} );
+			planeMesh = new THREE.Mesh( planeGeometry, planeMaterial );
+			startScene.add(planeMesh);
+			planeMesh.position.x = 0;
+			planeMesh.position.y = 0;
+			planeMesh.position.z = 0;
+			planeMesh.rotation.x = -Math.PI/2;
+			planeMesh.receiveShadow = true;
+
+
+
+
+		// // creating a textured plane which receives shadows
+		// var geometry = new THREE.PlaneGeometry( 80, 80, 80 );
+		// var texture = new THREE.TextureLoader().load( '../images/'+image );
+		// texture.wrapS = THREE.RepeatWrapping;
+		// texture.wrapT = THREE.RepeatWrapping;
+		// texture.repeat.set( k, k );
+		// var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
+		// //var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
+		// //var mesh = new THREE.Mesh( geometry, material );
+		// var mesh = new THREE.Mesh( geometry, material);
+		// 		console.log("createBackground");
+
+
+
+		// mesh.receiveShadow = false;
+
+
+		return planeMesh
+
+
+	}
+
 
 
 
@@ -336,8 +398,18 @@ The user moves a cube around the board trying to knock balls into a cone
 		console.log("Keydown:"+event.key);
 		//console.dir(event);
 		// first we handle the "play again" key in the "youwon" scene
-		if (gameState.scene == 'youwon' && event.key=='r') {
+
+		if (gameState.scene == 'start' && event.key=='p') {
 			gameState.scene = 'main';
+			gameState.score = 0;
+			addBalls();
+			return;
+		}
+
+		if (gameState.scene == 'youwon' && event.key=='r') {
+						gameState.scene = 'start';
+
+			//gameState.scene = 'main';
 			gameState.score = 0;
 			addBalls();
 			return;
@@ -355,6 +427,10 @@ The user moves a cube around the board trying to knock balls into a cone
 			case "m": controls.speed = 30; break;
       case " ": controls.fly = true; break;
       case "h": controls.reset = true; break;
+
+    //  case "p": controls.openScene = true; break;
+
+
 
 
 			// switch cameras
@@ -384,6 +460,10 @@ The user moves a cube around the board trying to knock balls into a cone
 			case "m": controls.speed = 10; break;
       case " ": controls.fly = false; break;
       case "h": controls.reset = false; break;
+
+
+           // case "p": controls.openScene = true; break;
+
 		}
 	}
 
@@ -429,9 +509,16 @@ The user moves a cube around the board trying to knock balls into a cone
 
 		switch(gameState.scene) {
 
+			case "start":
+				//startText.rotateY(0.005);
+				renderer.render( startScene, startCamera );
+				break;
+
 			case "youwon":
 				endText.rotateY(0.005);
 				renderer.render( endScene, endCamera );
+				 var info = document.getElementById("info");
+		info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
 				break;
 
 			case "main":
@@ -440,6 +527,8 @@ The user moves a cube around the board trying to knock balls into a cone
 				if (gameState.camera!= 'none'){
 					renderer.render( scene, gameState.camera );
 				}
+				 var info = document.getElementById("info");
+		info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
 				break;
 
 			default:
@@ -448,7 +537,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		}
 
 		//draw heads up display ..
-	  var info = document.getElementById("info");
-		info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
+	 //  var info = document.getElementById("info");
+		// info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
 
 	}
