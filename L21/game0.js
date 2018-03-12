@@ -117,6 +117,8 @@ function createMainScene(){
 
     addBalls(20);
 
+    addMedBalls(2);
+
 
     cone = createConeMesh(4,6);
     cone.position.set(10,3,7);
@@ -145,6 +147,29 @@ function addBalls(numBalls){
 				       if (gameState.score==numBalls) {
 					   gameState.scene='youwon';
 				       }
+				       // make the ball drop below the scene ..
+				       // threejs doesn't let us remove it from the schene...
+				       this.position.y = this.position.y - 100;
+				       this.__dirtyPosition = true;
+				   }
+			       }
+			     )
+    }
+}
+
+function addMedBalls(numBalls){
+
+    for(i=0;i<numBalls;i++){
+	var ball = createMedBall();
+	ball.position.set(randN(20)+15,30,randN(20)+15);
+	scene.add(ball);
+
+	ball.addEventListener( 'collision',
+			       function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+				   if (other_object==avatar){
+				       console.log("ball "+i+" hit the avatar");
+				       soundEffect('good.wav');
+				       gameState.health += 1;  // add one to the score
 				       // make the ball drop below the scene ..
 				       // threejs doesn't let us remove it from the schene...
 				       this.position.y = this.position.y - 100;
@@ -404,6 +429,17 @@ function createBall(){
     return mesh;
 }
 
+function createMedBall(){
+    //var geometry = new THREE.SphereGeometry( 4, 20, 20);
+    var geometry = new THREE.SphereGeometry( 1, 10, 10);
+    var material = new THREE.MeshLambertMaterial( { color: 0x0D0DD7} );
+    var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
+    var mesh = new Physijs.BoxMesh( geometry, material );
+    mesh.setDamping(0.1,0.1);
+    mesh.castShadow = true;
+    return mesh;
+}
+
 function initControls(){
     // here is where we create the eventListeners to respond to operations
 
@@ -515,6 +551,18 @@ function updateEnemy() {
     }
 }
 
+function updateMedBall() {
+    var avatarPosition = new THREE.Vector3().setFromMatrixPosition(avatar.matrixWorld);
+    var medBallPosition = new THREE.Vector3().setFromMatrixPosition(enemy.matrixWorld);
+    var diff = avatarPosition.distanceTo(medBallPosition);
+    //console.log(diff);
+    if (diff > 0 && diff <= dangerZone) {
+	enemy.lookAt(avatarPosition);
+	var forward = avatar.getWorldDirection();
+	enemy.setLinearVelocity(forward.multiplyScalar(-creep));
+    }
+}
+
 function animate() {
 
     requestAnimationFrame( animate );
@@ -538,6 +586,9 @@ break;
   gameState.timeLeft = Math.round(60 - (clock.getElapsedTime() - gameState.startTime) + gameState.bonusTime)
 	if (gameState.camera!= 'none'){
 	    renderer.render( scene, gameState.camera );
+	}
+  if (gameState.timeLeft == 0){
+	    gameState.scene='youlose';
 	}
 	break;
 
