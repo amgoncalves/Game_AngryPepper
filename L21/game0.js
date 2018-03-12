@@ -25,7 +25,7 @@ var controls =
      camera:camera}
 
 var gameState =
-    {startTime:0, bonusTime:0, score:0, health:1, scene:'main', camera:'none' }
+    {startTime:0, bonusTime:0, score:0, health:3, scene:'main', camera:'none' }
 
 // Here is the main game control
 init();
@@ -328,8 +328,8 @@ function setAvatar() {
                  gameState.scene='youlose';
                }
                addBalls(1);
-               avatar.__dirtyPosition = true;
-             	 avatar.position.set(randN(20)+15,20,randN(20)+15);
+               enemy.__dirtyPosition = true;
+             	 enemy.position.set(randN(20)+15,20,randN(20)+15);
 				   } else if (other_object==bonus){
              console.log("avatar hit clock");
              soundEffect('coin.wav');
@@ -459,7 +459,7 @@ function keydown(event){
     if (gameState.scene == 'youwon' || gameState.scene == 'youlose' && event.key=='r') {
 	gameState.scene = 'main';
 	gameState.score = 0;
-  gameState.health = 1;
+  gameState.health = 3;
   gameState.startTime = clock.getElapsedTime();
   gameState.timeLeft = 60;
 	addBalls(20);
@@ -587,7 +587,7 @@ break;
 	if (gameState.camera!= 'none'){
 	    renderer.render( scene, gameState.camera );
 	}
-  if (gameState.timeLeft == 0){
+  if (gameState.timeLeft <= 0){
 	    gameState.scene='youlose';
 	}
 	break;
