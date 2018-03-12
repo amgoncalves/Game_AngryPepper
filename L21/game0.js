@@ -21,8 +21,7 @@ The user moves a cube around the board trying to knock balls into a cone
 	var startScene, startCamera, startText;
 
 
-	var Arraycolor=new Array("#99CCFF","#FFCCFF","#FFCC99","#00FFFF","#FFFF00", "#00FF66","#FFFF99","#FFCC00","#FF00FF");
-	var x=0;
+	var scoreBoardColor, x;
 
 
 	var controls =
@@ -43,28 +42,16 @@ The user moves a cube around the board trying to knock balls into a cone
 	initControls();
 	animate();  // start the animation loop!
 
-	
-	function changeColors(){
-  		x++;
-  		if (x==(Arraycolor.length-1)) 
-  			{x=0;
-  			}
-  			document.bgColor = Arraycolor[x];
-  			setTimeout("changeColors()",900);
-			}
+	x = 0;
+	scoreBoardColor = new Array("#FFCCFF","#FFCC99","#00FFFF","#FFFF00", "#00FF66","#FFFF99","#FFCC00","#FF00FF");
+
 	changeColors();
 	
-
-
-
 
 	function createOpenScene(){
 			
 		startScene = new THREE.Scene();
 		startText = createBackground('welcome.png',1);
-
-  		
-
 
 		startScene.add(startText);
 		var startlight = createPointLight();
@@ -74,6 +61,17 @@ The user moves a cube around the board trying to knock balls into a cone
 		startCamera.position.set(0,50,1);
 		startCamera.lookAt(0,0,0);
 	}
+
+	function changeColors(){
+
+  		x++;
+  		if (x==( scoreBoardColor.length-1)) 
+  		{x=0; }
+
+  			document.bgColor = scoreBoardColor[x];
+
+  			setTimeout("changeColors()",900);
+			}
 
 
 	function createEndScene(){
@@ -227,8 +225,8 @@ The user moves a cube around the board trying to knock balls into a cone
 	}
 
   function initPhysijs(){
-    Physijs.scripts.worker = '../js/physijs_worker.js';
-    Physijs.scripts.ammo = '../js/ammo.js';
+    Physijs.scripts.worker = '/js/physijs_worker.js';
+    Physijs.scripts.ammo = '/js/ammo.js';
   }
 	/*
 		The renderer needs a size and the actual canvas we draw on
