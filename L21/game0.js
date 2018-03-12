@@ -286,8 +286,8 @@ function setAvatar() {
 				       soundEffect('die.wav');
 				       gameState.score -= 1;  // deduct one from the score
                addBalls(1);
-               avatar.__dirtyPosition = true;
-             	 avatar.position.set(randN(20)+15,20,randN(20)+15);
+               enemy.__dirtyPosition = true;
+             	 enemy.position.set(randN(20)+15,4,randN(20)+15);
 				   } else if (other_object==bonus){
              console.log("avatar hit clock");
              soundEffect('coin.wav');
