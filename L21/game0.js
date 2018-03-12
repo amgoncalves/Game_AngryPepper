@@ -75,11 +75,13 @@ function createMainScene(){
 
     // create the avatar
     avatarCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    //avatar = initSuzanne();
     avatar = createAvatar();
     avatar.translateY(20);
     avatarCam.translateY(-4);
     avatarCam.translateZ(3);
     scene.add(avatar);
+    loadMoneky();
     setAvatar();
     gameState.camera = avatarCam;
 
@@ -263,20 +265,47 @@ function createSkyBox(image,k){
     // we need to rotate the mesh 90 degrees to make it horizontal not vertical
 }
 
+
+
 function createAvatar(){
+   
     var geometry = new THREE.BoxGeometry( 5, 5, 6);
-    var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
+    var material = new THREE.MeshLambertMaterial( { color: 0xffffff,opacity : 0, transparent :true} );
     var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
     var mesh = new Physijs.BoxMesh( geometry, pmaterial );
+
+
     mesh.setDamping(0.1,0.1);
     mesh.castShadow = true;
 
-    avatarCam.position.set(0,4,0);
-    avatarCam.lookAt(0,4,10);
+    avatarCam.position.set(0,8,2);
+    avatarCam.lookAt(0,8,10);
     mesh.add(avatarCam);
 
-    return mesh;
+    return mesh; 
 }
+
+function loadMoneky() {
+    var loader = new THREE.OBJLoader();
+    loader.load("../models/suzanne/suzanne.obj",
+        function(obj) {
+            console.log("loading obj file");
+            obj.scale.x=2;
+            obj.scale.y=2;
+            obj.scale.z=2;
+            obj.position.y = 1;
+            obj.position.z = 0;
+            obj.castShadow = true;
+            avatar.add(obj);
+        },
+        function(xhr){
+            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );},
+
+        function(err){
+            console.log("error in loading: "+err);}
+           )
+}
+
 
 function setAvatar() {
   avatar.addEventListener( 'collision',
@@ -434,6 +463,9 @@ function keydown(event){
     case "ArrowRight": avatarCam.translateY(-1);break;
     case "ArrowUp": avatarCam.translateZ(-1);break;
     case "ArrowDown": avatarCam.translateZ(1);break;
+
+    case "q": avatarCam.rotateY(0.1); break;
+    case "e": avatarCam.rotateY(-0.1); break;
     }
 }
 
