@@ -17,6 +17,7 @@ var clock;
 // here are some mesh objects ...
 var cone;
 var endScene, endCamera, endText;
+var endScene2, endCamera2, endText2;
 
 var controls =
     {fwd:false, bwd:false, left:false, right:false,
@@ -24,7 +25,7 @@ var controls =
      camera:camera}
 
 var gameState =
-    {startTime:0, bonusTime:0, score:0, health:10, scene:'main', camera:'none' }
+    {startTime:0, bonusTime:0, score:0, health:1, scene:'main', camera:'none' }
 
 // Here is the main game control
 init();
@@ -43,6 +44,18 @@ function createEndScene(){
     endCamera.lookAt(0,0,0);
 }
 
+function createEndScene2(){
+    endScene2 = initScene();
+    endText2 = createSkyBox('youlose.jpg',10);
+    endScene2.add(endText2);
+    var light2 = createPointLight();
+    light2.position.set(0,200,20);
+    endScene2.add(light2);
+    endCamera2 = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    endCamera2.position.set(0,50,1);
+    endCamera2.lookAt(0,0,0);
+}
+
 /**
    To initialize the scene, we initialize each of its components
 */
@@ -50,6 +63,7 @@ function init(){
     initPhysijs();
     scene = initScene();
     createEndScene();
+    createEndScene2();
     initRenderer();
     createMainScene();
 }
@@ -284,7 +298,10 @@ function setAvatar() {
 				   if (other_object==enemy){
 				       console.log("avatar hit enemy");
 				       soundEffect('die.wav');
-				       gameState.score -= 1;  // deduct one from the score
+				       gameState.health -= 1;  // deduct one from the score
+               if(gameState.health == 0){
+                 gameState.scene='youlose';
+               }
                addBalls(1);
                avatar.__dirtyPosition = true;
              	 avatar.position.set(randN(20)+15,20,randN(20)+15);
@@ -403,14 +420,16 @@ function keydown(event){
     console.log("Keydown:"+event.key);
     //console.dir(event);
     // first we handle the "play again" key in the "youwon" scene
-    if (gameState.scene == 'youwon' && event.key=='r') {
+    if (gameState.scene == 'youwon' || gameState.scene == 'youlose' && event.key=='r') {
 	gameState.scene = 'main';
 	gameState.score = 0;
+  gameState.health = 1;
   gameState.startTime = clock.getElapsedTime();
   gameState.timeLeft = 60;
 	addBalls(20);
 	return;
     }
+
 
     // this is the regular scene
     switch (event.key){
@@ -507,6 +526,11 @@ function animate() {
 	renderer.render( endScene, endCamera );
 	break;
 
+  case "youlose":
+endText2.rotateY(0.005);
+renderer.render( endScene2, endCamera2 );
+break;
+
     case "main":
 	updateAvatar();
 	updateEnemy();
@@ -524,6 +548,6 @@ function animate() {
 
     //draw heads up display ..
     var info = document.getElementById("info");
-    info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '  Time left: ' + gameState.timeLeft +'</div>';
+    info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '  Health: ' + gameState.health +'  Time left: ' + gameState.timeLeft +'</div>';
 
 }
