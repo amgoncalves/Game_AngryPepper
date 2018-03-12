@@ -511,6 +511,8 @@ The user moves a cube around the board trying to knock balls into a cone
 
 			case "start":
 				//startText.rotateY(0.005);
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
 				renderer.render( startScene, startCamera );
 				break;
 
@@ -522,12 +524,17 @@ The user moves a cube around the board trying to knock balls into a cone
 				break;
 
 			case "main":
+			
+			var info = document.getElementById("info");
+
 				updateAvatar();
 	    	scene.simulate();
 				if (gameState.camera!= 'none'){
+					renderer.setSize(window.innerWidth, window.innerHeight - info.offsetHeight);
+
 					renderer.render( scene, gameState.camera );
 				}
-				 var info = document.getElementById("info");
+			
 		info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
 				break;
 
