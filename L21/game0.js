@@ -115,7 +115,7 @@ function createMainScene(){
     scene.add(bonus);
     loadClock();
 
-    addBalls(20);
+    addBalls(10);
 
     addMedBalls(2);
 
@@ -458,11 +458,11 @@ function keydown(event){
     // first we handle the "play again" key in the "youwon" scene
     if (gameState.scene == 'youwon' || gameState.scene == 'youlose' && event.key=='r') {
 	gameState.scene = 'main';
+  addBalls(gameState.score);
 	gameState.score = 0;
   gameState.health = 3;
   gameState.startTime = clock.getElapsedTime();
   gameState.timeLeft = 60;
-	addBalls(20);
 	return;
     }
 
