@@ -21,7 +21,8 @@ The user moves a cube around the board trying to knock balls into a cone
 	var startScene, startCamera, startText;
 
 
-
+	var Arraycolor=new Array("#99CCFF","#FFCCFF","#FFCC99","#00FFFF","#FFFF00", "#00FF66","#FFFF99","#FFCC00","#FF00FF");
+	var x=0;
 
 
 	var controls =
@@ -41,6 +42,21 @@ The user moves a cube around the board trying to knock balls into a cone
   	init();
 	initControls();
 	animate();  // start the animation loop!
+
+	
+	function changeColors(){
+  		x++;
+  		if (x==(Arraycolor.length-1)) 
+  			{x=0;
+  			}
+  			document.bgColor = Arraycolor[x];
+  			setTimeout("changeColors()",900);
+			}
+	changeColors();
+	
+
+
+
 
 	function createOpenScene(){
 			
@@ -284,26 +300,6 @@ The user moves a cube around the board trying to knock balls into a cone
 			planeMesh.position.z = 0;
 			planeMesh.rotation.x = -Math.PI/2;
 			planeMesh.receiveShadow = true;
-
-
-
-
-		// // creating a textured plane which receives shadows
-		// var geometry = new THREE.PlaneGeometry( 80, 80, 80 );
-		// var texture = new THREE.TextureLoader().load( '../images/'+image );
-		// texture.wrapS = THREE.RepeatWrapping;
-		// texture.wrapT = THREE.RepeatWrapping;
-		// texture.repeat.set( k, k );
-		// var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
-		// //var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
-		// //var mesh = new THREE.Mesh( geometry, material );
-		// var mesh = new THREE.Mesh( geometry, material);
-		// 		console.log("createBackground");
-
-
-
-		// mesh.receiveShadow = false;
-
 
 		return planeMesh
 
