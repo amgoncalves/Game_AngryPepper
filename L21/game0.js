@@ -224,7 +224,11 @@ function soundEffect(file){
 
 	
 
+x = 0;
+	scoreBoardColor = new Array("#FFCCFF","#FFCC99","#00FFFF","#FFFF00", "#00FF66","#FFFF99","#FFCC00","#FF00FF");
 
+	changeColors();
+	
 
 
 	// Here is the main game control
@@ -233,10 +237,6 @@ function soundEffect(file){
 	initControls();
 	animate();  // start the animation loop!
 
-	x = 0;
-	scoreBoardColor = new Array("#FFCCFF","#FFCC99","#00FFFF","#FFFF00", "#00FF66","#FFFF99","#FFCC00","#FF00FF");
-
-	changeColors();
 	
 
 	function createOpenScene(){
@@ -411,91 +411,86 @@ function createBoxMesh(color){
 
 
 
-	var clock;
+	// var clock;
 
-	function initControls(){
-		// here is where we create the eventListeners to respond to operations
+	// function initControls(){
+	// 	// here is where we create the eventListeners to respond to operations
 
-		  //create a clock for the time-based animation ...
-			clock = new THREE.Clock();
-			clock.start();
+	// 	  //create a clock for the time-based animation ...
+	// 		clock = new THREE.Clock();
+	// 		clock.start();
 
-			window.addEventListener( 'keydown', keydown);
-			window.addEventListener( 'keyup',   keyup );
-  }
+	// 		window.addEventListener( 'keydown', keydown);
+	// 		window.addEventListener( 'keyup',   keyup );
+ //  }
 
-	function keydown(event){
-		console.log("Keydown:"+event.key);
-		//console.dir(event);
-		// first we handle the "play again" key in the "youwon" scene
+	// function keydown(event){
+	// 	console.log("Keydown:"+event.key);
+	// 	//console.dir(event);
+	// 	// first we handle the "play again" key in the "youwon" scene
 
-		if (gameState.scene == 'start' && event.key=='p') {
-			gameState.scene = 'main';
-			gameState.score = 0;
-			addBalls();
-			return;
-		}
+		
 
-		if (gameState.scene == 'youwon' && event.key=='r') {
-						gameState.scene = 'start';
+	// 	if (gameState.scene == 'youwon' && event.key=='r') {
+	// 					gameState.scene = 'start';
 
-			//gameState.scene = 'main';
-			gameState.score = 0;
-			addBalls();
-			return;
-		}
+	// 		//gameState.scene = 'main';
+	// 		gameState.score = 0;
+	// 		addBalls();
+	// 		return;
+	// 	}
 
-		// this is the regular scene
-		switch (event.key){
-			// change the way the avatar is moving
-			case "w": controls.fwd = true;  break;
-			case "s": controls.bwd = true; break;
-			case "a": controls.left = true; break;
-			case "d": controls.right = true; break;
-			case "r": controls.up = true; break;
-			case "f": controls.down = true; break;
-			case "m": controls.speed = 30; break;
-      case " ": controls.fly = true; break;
-      case "h": controls.reset = true; break;
+	// 	// this is the regular scene
+	// 	switch (event.key){
+	// 		// change the way the avatar is moving
+	// 		case "w": controls.fwd = true;  break;
+	// 		case "s": controls.bwd = true; break;
+	// 		case "a": controls.left = true; break;
+	// 		case "d": controls.right = true; break;
+	// 		case "r": controls.up = true; break;
+	// 		case "f": controls.down = true; break;
+	// 		case "m": controls.speed = 30; break;
+ //      case " ": controls.fly = true; break;
+ //      case "h": controls.reset = true; break;
 
-    //  case "p": controls.openScene = true; break;
+ //    //  case "p": controls.openScene = true; break;
 
 
 
 
-			// switch cameras
-			case "1": gameState.camera = camera; break;
-			case "2": gameState.camera = avatarCam; break;
+	// 		// switch cameras
+	// 		case "1": gameState.camera = camera; break;
+	// 		case "2": gameState.camera = avatarCam; break;
 
-			// move the camera around, relative to the avatar
-			case "ArrowLeft": avatarCam.translateY(1);break;
-			case "ArrowRight": avatarCam.translateY(-1);break;
-			case "ArrowUp": avatarCam.translateZ(-1);break;
-			case "ArrowDown": avatarCam.translateZ(1);break;
+	// 		// move the camera around, relative to the avatar
+	// 		case "ArrowLeft": avatarCam.translateY(1);break;
+	// 		case "ArrowRight": avatarCam.translateY(-1);break;
+	// 		case "ArrowUp": avatarCam.translateZ(-1);break;
+	// 		case "ArrowDown": avatarCam.translateZ(1);break;
 
-		}
+	// 	}
 
-	}
+	// }
 
-	function keyup(event){
-		//console.log("Keydown:"+event.key);
-		//console.dir(event);
-		switch (event.key){
-			case "w": controls.fwd   = false;  break;
-			case "s": controls.bwd   = false; break;
-			case "a": controls.left  = false; break;
-			case "d": controls.right = false; break;
-			case "r": controls.up    = false; break;
-			case "f": controls.down  = false; break;
-			case "m": controls.speed = 10; break;
-      case " ": controls.fly = false; break;
-      case "h": controls.reset = false; break;
+	// function keyup(event){
+	// 	//console.log("Keydown:"+event.key);
+	// 	//console.dir(event);
+	// 	switch (event.key){
+	// 		case "w": controls.fwd   = false;  break;
+	// 		case "s": controls.bwd   = false; break;
+	// 		case "a": controls.left  = false; break;
+	// 		case "d": controls.right = false; break;
+	// 		case "r": controls.up    = false; break;
+	// 		case "f": controls.down  = false; break;
+	// 		case "m": controls.speed = 10; break;
+ //      case " ": controls.fly = false; break;
+ //      case "h": controls.reset = false; break;
 
 
-           // case "p": controls.openScene = true; break;
+ //           // case "p": controls.openScene = true; break;
 
-		}
-	}
+	// 	}
+	// }
 
 
 function createGround(image){
@@ -715,9 +710,27 @@ function initControls(){
 function keydown(event){
     console.log("Keydown:"+event.key);
     //console.dir(event);
+
+    if (gameState.scene == 'start' && event.key=='p') {
+            gameState.scene = 'main';
+            // gameState.score = 0;
+            //addBalls();
+addBalls(gameState.score);
+    gameState.score = 0;
+  gameState.health = 3;
+  gameState.startTime = clock.getElapsedTime();
+  gameState.timeLeft = 60;
+
+
+            return;
+        }
+
+
+
     // first we handle the "play again" key in the "youwon" scene
     if (gameState.scene == 'youwon' || gameState.scene == 'youlose' && event.key=='r') {
-	gameState.scene = 'main';
+
+        gameState.scene = 'start';
   addBalls(gameState.score);
 	gameState.score = 0;
   gameState.health = 3;
@@ -844,22 +857,12 @@ function animate() {
 			case "youwon":
 				endText.rotateY(0.005);
 				renderer.render( endScene, endCamera );
-				 var info = document.getElementById("info");
-		info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
+			//	 var info = document.getElementById("info");
+		//info.innerHTML='<div style="font-size:24pt">Score: ' + gameState.score + '</div>';
 				break;
 
-			case "main":
-			
-
-				updateAvatar();
-	    	scene.simulate();
-				if (gameState.camera!= 'none'){
-
-					renderer.render( scene, gameState.camera );
-				}
-			
-				break;
-  case "youlose":
+		
+		  case "youlose":
 endText2.rotateY(0.005);
 renderer.render( endScene2, endCamera2 );
 break;
